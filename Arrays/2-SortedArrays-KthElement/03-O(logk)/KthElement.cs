@@ -6,97 +6,64 @@ using System.Threading.Tasks;
 
 namespace _03_O_logk_
 {
-  internal class KthElement
+  internal class Element
   {
-    public static int FetchKthElement(int[] arr1, int[] arr2, int m, int n, int k)
+    public static int KthElement(int[] arr1, int[] arr2, int m, int n, int k, int st1 = 0, int st2 =0)
     {
-      //Base Cases :
-      // If any one of the array has only one element
-      if (m == 1 || n == 1)
+      //if st1 of arr1 has reached end of array 1
+      if(st1 == m)
       {
-        //if arr2 has only one element, swap arr2 with arr1 and m with n such that arr1 becomes the array with one element
-        if (n==1)
+        return arr2[st2 + k - 1];
+      }
+      //if st2 of arr2 has reached end of array 2
+      if(st2 == n)
+      {
+        return arr1[st1 + k - 1];
+      }
+
+      //check for k < 0 or greater than all elements
+      if(k < 0 || k > (m-st1) + (n-st2))
+      {
+        return -1; //or raise and exception
+      }
+
+      if(k==1)
+      {
+        return Math.Min(arr1[st1], arr2[st2]);
+      }
+
+      int curr = k / 2;
+      //if k/2 is greater than current set of elements in arr1
+      if(curr > m-st1)
+      {
+        if (arr1[m-1] > arr2[st2+curr-1])
         {
-          int[] temp = arr1;
-          arr1 = arr2;
-          arr2 = temp;
-          n = m;
-        }
-        //if looking for 1st element, we just need to check first element of both arrays
-        if(k==1)
-        {
-          return Math.Min(arr1[0], arr2[0]);
-        }
-        //if looking for last element, we just need to check the last element of arr2 with the only element of arr1
-        else if(k == n + 1)
-        {
-          return Math.Max(arr1[0], arr2[n-1]);
+          return arr2[st2 + (k - (m - st1) - 1)];
         }
         else
         {
-          //else if kth element in arr2 is less than the only element in arr1, it implies that in the final array, arr1[0] will be placed after kth element.
-          if (arr2[k - 1] < arr1[0])
-          {
-            return arr2[k - 1];
-          }
-          //else check k-1th element, if less then k-1th element will become kth element as arr1[0] will be placed before k-1th
-          else
-          {
-            return Math.Max(arr1[0], arr2[k - 2]);
-          }
+          return KthElement(arr1, arr2, m, n, k - curr, st1, st2 + curr);
         }
       }
-      //Otherwise proceed with Divide and Conquer and select Mid points
-      int mid1 = (m - 1) / 2;
-      int mid2 = (n - 1) / 2;
-
-      if (mid1 + mid2 + 1 < k)
+      if(curr>n-st2)
       {
-        // if k is greater than the sum of midpoints, discard the smaller half of the arrays and recurse
-        if (arr1[mid1] < arr2[mid2])
+        if (arr2[n - 1] > arr1[st2 + curr - 1])
         {
-          return FetchKthElement(
-            arr1[(mid1 + 1)..],
-            arr2,
-            m - (mid1 + 1),
-            n,
-            k - (mid1 + 1)
-          );
+          return arr1[st1 + (k - (n - st2) - 1)];
         }
         else
-        {
-          return FetchKthElement(
-            arr1,
-            arr2[(mid2 + 1)..],
-            m,
-            n - (mid2 + 1),
-            k - (mid2 + 1)
-          );
-        }
+          return KthElement(arr1, arr2, m, n, k - curr, st1 + curr, st2);
+      }
+
+      if (arr1[st1 + curr -1] < arr2[st2 + curr - 1])
+      {
+        return KthElement(arr1, arr2, m, n, k - curr, st1 + curr, st2);
       }
       else
       {
-        if (arr1[mid1] < arr2[mid2])
-        {
-          return FetchKthElement(
-            arr1,
-            arr2[..(mid2 + 1)],
-            m,
-            mid2 + 1,
-            k
-          );
-        }
-        else
-        {
-          return FetchKthElement(
-            arr1[..(mid1 + 1)],
-            arr2,
-            mid1 + 1,
-            n,
-            k
-          );
-        }
+        return KthElement(arr1, arr2, m, n, k - curr, st1, st2 + curr);
       }
     }
   }
+   
 }
